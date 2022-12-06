@@ -30,17 +30,13 @@ app.post('/messages', function(request, response) {
       message.text == undefined){
       return response.status(400).send({success: false})
     }else{
+  message.timeSent = new Date()
   message.id = messages.length
   messages.push(message)
   response.status(201).send(message)
   }
 })
-//Get message by ID
-app.get("/messages/:id", function(request, response){
-  const id = request.params.id;
-  const result = messages.find(function(message){return message.id == id})
-response.send({result})
-})
+
 //Delete message by ID
 app.delete("/messages/:id", function(request, response){
   const id = request.params.id;
@@ -50,7 +46,27 @@ app.delete("/messages/:id", function(request, response){
   messages = filteredID;
   response.send({ success: true });
 });
+//Search messages by text
+app.get("/messages/search", function(request, response){
+  const termParam = request.query.text.toLowerCase()
+  const result = messages.filter(function (message){
+    return message.text.toLowerCase().includes(termParam) || message.from.toLowerCase().includes(termParam)
+  })
+  response.send(result)
+});
+//Display latest messages
+app.get("/messages/latest", function(request, response){
+  let latestMessages = messages.reverse().slice(0,10)
+  response.send(latestMessages);
+})
+//Get message by ID
+app.get("/messages/:id", function(request, response){
+  const id = request.params.id;
+  const result = messages.find(function(message){return message.id == id})
+response.send(result)
+})
+
 
 app.listen(3000, () => {
-   console.log("Listening on port 3000")
+   console.log(`http://localhost:3000/`)
   });
